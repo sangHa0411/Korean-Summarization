@@ -61,8 +61,8 @@ def train(args):
 
     # -- Config
     config = AutoConfig.from_pretrained(args.PLM)
-    config.max_length = 128
-    config.num_beams = 1
+    config.max_length = args.generation_max_length
+    config.num_beams = args.beam_size
 
     # -- Model
     model = AutoModelForSeq2SeqLM.from_pretrained(args.PLM, config=config).to(device)
@@ -85,7 +85,7 @@ def train(args):
         weight_decay=args.weight_decay,                                 # weight decay
         gradient_accumulation_steps=args.gradient_accumulation_steps,   # gradient accumulation steps
         eval_accumulation_steps=args.gradient_accumulation_steps,       # eval_accumulation_steps
-        overwrite_output_dir=True,
+        overwrite_output_dir=False,                                     # overwrite output directory
         predict_with_generate=True
     )
     
@@ -143,14 +143,16 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=5e-5, help='learning rate (default: 5e-5)')
     parser.add_argument('--train_batch_size', type=int, default=32, help='train batch size (default: 32)')
     parser.add_argument('--eval_batch_size', type=int, default=32, help='eval batch size (default: 32)')
-    parser.add_argument('--warmup_steps', type=int, default=5000, help='number of warmup steps for learning rate scheduler (default: 5000)')
+    parser.add_argument('--generation_max_length', type=int, default=128, help='eval batch size (default: 128)')
+    parser.add_argument('--beam_size', type=int, default=1, help='eval batch size (default: 1)')
+    parser.add_argument('--warmup_steps', type=int, default=2000, help='number of warmup steps for learning rate scheduler (default: 2000)')
     parser.add_argument('--weight_decay', type=float, default=1e-4, help='strength of weight decay (default: 1e-4)')
     parser.add_argument('--evaluation_strategy', type=str, default='steps', help='evaluation strategy to adopt during training, steps or epoch (default: steps)')
     parser.add_argument('--eval_steps', type=int, default=5000, help='evaluation steps (5000)')
     parser.add_argument('--log_steps', type=int, default=1000, help='evaluation steps (1000)')
     parser.add_argument('--gradient_accumulation_steps', type=int, default=1, help='gradient_accumulation_steps (defalut: 1)')
     parser.add_argument('--max_input_len', type=int, default=1024, help='max length of input tensor (default: 1024)')
-    parser.add_argument('--max_target_len', type=int, default=64, help='max length of target tensor (default: 64)')
+    parser.add_argument('--max_target_len', type=int, default=128, help='max length of target tensor (default: 128)')
     parser.add_argument('--preprocessing_num_workers', type=int, default=4, help='preprocessing num workers (default: 4)')
 
     # -- Seed
